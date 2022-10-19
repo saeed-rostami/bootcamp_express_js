@@ -20,6 +20,8 @@ const app = express();
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"))
 }
+// body parser
+app.use(express.json());
 
 // app uses
 app.use("/api/v1/bootcamps", bootcamp);

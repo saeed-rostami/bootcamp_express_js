@@ -9,7 +9,8 @@
         trim: true,
         maxLength: [50," Name can not be more than 50 characters"],
     },
-    Slug: true,
+    slug: String,
+
     description: {
         type: String,
         required: [true, "Please add a name"],
@@ -21,7 +22,7 @@
     },
     phone: {
         type: String,
-        maxLength: [11," phone can not be more than 50 characters"],
+        maxLength: [50," phone can not be more than 50 characters"],
     },
 
     email: {
@@ -37,12 +38,12 @@
     lcoation: {
         type: {
             type: String,
-            required: true,
+            required: false,
             enum: ['Point']
         },
-        coordnates: {
+        coordinates: {
             type: [Number],
-            required: true,
+            required: false,
             index: '2dsphere'
         },
         formattedAddress: String,
@@ -58,7 +59,7 @@
         enum: [
             'Web Development',
             'Mobile Development',
-            'UI / UX',
+            'UI/UX',
             'Data Science',
             'Business',
             'Other',
