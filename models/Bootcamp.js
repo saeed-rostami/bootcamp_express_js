@@ -14,7 +14,7 @@
     description: {
         type: String,
         required: [true, "Please add a name"],
-        maxLength: [250," Description can not be more than 250 characters"],
+        maxlength: [250," Description can not be more than 250 characters"],
     },
     website : {
         type: String,
@@ -35,7 +35,7 @@
         maxLength: [1500," address can not be more than 250 characters"],
     },
 
-    lcoation: {
+    location: {
         type: {
             type: String,
             required: false,
@@ -108,4 +108,4 @@
 
  });
 
- module.exports = mongoose.model("Bootcamp" , BootcampSchema)
+ module.exports = mongoose.model("Bootcamp" , BootcampSchema);
