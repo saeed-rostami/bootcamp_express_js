@@ -1,28 +1,31 @@
- const mongoose = require('mongoose');
+const mongoose = require('mongoose');
+const slugify = require("slugify");
+const geocoder = require("../utilities/geocoder");
 
- const BootcampSchema = new mongoose.Schema( {
 
-    name : {
+const BootcampSchema = new mongoose.Schema({
+
+    name: {
         type: String,
         required: [true, "Please add a name"],
         unique: true,
         trim: true,
-        maxLength: [50," Name can not be more than 50 characters"],
+        maxLength: [50, " Name can not be more than 50 characters"],
     },
     slug: String,
 
     description: {
         type: String,
         required: [true, "Please add a name"],
-        maxlength: [250," Description can not be more than 250 characters"],
+        maxlength: [250, " Description can not be more than 250 characters"],
     },
-    website : {
+    website: {
         type: String,
-    
+
     },
     phone: {
         type: String,
-        maxLength: [50," phone can not be more than 50 characters"],
+        maxLength: [50, " phone can not be more than 50 characters"],
     },
 
     email: {
@@ -32,7 +35,7 @@
     address: {
         type: String,
         required: [true, "Please add a address"],
-        maxLength: [1500," address can not be more than 250 characters"],
+        maxLength: [1500, " address can not be more than 250 characters"],
     },
 
     location: {
@@ -78,34 +81,63 @@
 
     photo: {
         type: String,
-        default: "no-photo.jpg", 
+        default: "no-photo.jpg",
     },
 
     housing: {
         type: Boolean,
-        default: false, 
+        default: false,
     },
 
     jobAssistance: {
         type: Boolean,
-        default: false, 
+        default: false,
     },
 
     jobGuarantee: {
         type: Boolean,
-        default: false, 
+        default: false,
     },
 
     acceptGi: {
         type: Boolean,
-        default: false, 
+        default: false,
     },
 
     created_at: {
         type: Date,
-        default: Date.now, 
+        default: Date.now,
     },
 
- });
+});
 
- module.exports = mongoose.model("Bootcamp" , BootcampSchema);
+
+//Create slug bu slugify
+BootcampSchema.pre('save', function (next) {
+    this.slug = slugify(this.name, {lower: true});
+    next();
+});
+
+//geo code location field
+BootcampSchema.pre('save', async function (next) {
+
+    // const loc = await geocoder.geocode(this.address);
+    //
+    // this.location = {
+    //     type: "Point",
+    //     coordinates: [loc[0].longitude, loc[0].latitude],
+    //     formattedAddress: loc[0].formattedAddress,
+    //     street: loc[0].streetName,
+    //     city: loc[0].citycode,
+    //     state: loc[0].stateCode,
+    //     zipcode: loc[0].zipcode,
+    //     country: loc[0].country,
+    // };
+
+    //in case not found address
+    this.address = "undefined";
+    next();
+});
+
+
+module.exports = mongoose.model("Bootcamp", BootcampSchema);
