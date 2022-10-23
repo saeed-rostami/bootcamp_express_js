@@ -121,20 +121,20 @@ BootcampSchema.pre('save', function (next) {
 //geo code location field
 BootcampSchema.pre('save', async function (next) {
 
-    // const loc = await geocoder.geocode(this.address);
-    //
-    // this.location = {
-    //     type: "Point",
-    //     coordinates: [loc[0].longitude, loc[0].latitude],
-    //     formattedAddress: loc[0].formattedAddress,
-    //     street: loc[0].streetName,
-    //     city: loc[0].citycode,
-    //     state: loc[0].stateCode,
-    //     zipcode: loc[0].zipcode,
-    //     country: loc[0].country,
-    // };
+    const loc = await geocoder.geocode(this.address);
 
-    //in case not found address
+    this.location = {
+        type: "Point",
+        coordinates: [loc[0].longitude, loc[0].latitude],
+        formattedAddress: loc[0].formattedAddress,
+        street: loc[0].streetName,
+        city: loc[0].citycode,
+        state: loc[0].stateCode,
+        zipcode: loc[0].zipcode,
+        country: loc[0].country,
+    };
+
+    // in case not found address
     this.address = "undefined";
     next();
 });
