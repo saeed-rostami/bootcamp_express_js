@@ -118,9 +118,9 @@ BootcampSchema.pre('save', function (next) {
     next();
 });
 
-//geo code location field
+//geocode location field
 BootcampSchema.pre('save', async function (next) {
-
+    //
     const loc = await geocoder.geocode(this.address);
 
     this.location = {
