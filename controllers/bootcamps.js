@@ -15,18 +15,17 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
     const reqQuery = {...req.query};
 
     //fields to exclude
-    const removeFields = ["select" , "sort"];
+    const removeFields = ["select", "sort", "page", "limit"];
 
     // loop over removeField and delete the params
     removeFields.forEach(param => delete reqQuery[param]);
-    console.log(removeFields);
+
 
     //create query string
     let queryString = JSON.stringify(reqQuery);
 
     //create operators
     queryString = queryString.replace(/\b(gt|gte|lt|lte|in|eq|nin)\b/g, match => `$${match}`);
-
 
 
     //Finding resource
@@ -41,16 +40,44 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
     if (req.query.sort) {
         const sortBy = req.query.sort.split(",").join(" ");
         query = query.sort(sortBy);
-    }
-    else {
+    } else {
         query = query.sort("-createdAt");
     }
 
-    // execute
-    const bootcamps = await query;
+    //Pagination
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 25;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const total = await Bootcamp.countDocuments();
+
+    query = query.skip(startIndex).limit(limit);
+
+
+        // execute
+        const bootcamps = await query;
+
+    //Pagination result
+    pagination = {};
+
+    if (endIndex < total) {
+        pagination.next = {
+            page: page + 1,
+            limit
+        };
+    }
+
+    if (startIndex > 0) {
+        pagination.prev = {
+            page: page - 1,
+            limit
+        };
+    }
+
 
     res.status(200).json({
         success: true,
+        pagination: pagination,
         count: bootcamps.length,
         // data: reqQuery,
         data: bootcamps
@@ -64,6 +91,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 
 exports.getBootcamp = asyncHandler(async (req, res, next) => {
     const bootcamp = await Bootcamp.findById(req.params.id);
+
     res.status(200).json({
         success: true,
         data: bootcamp
