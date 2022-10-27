@@ -1,6 +1,5 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const bootcamp = require("./routes/bootcamps");
 // const logs = require("./middleware/logger");
 const morgan = require("morgan");
 const connectDB = require("./config/db");
@@ -12,6 +11,11 @@ dotenv.config({path: "./config/config.env"});
 
 connectDB();
 // console.log(process.env.MONOG_URL);
+
+
+//route files
+const bootcamp = require("./routes/bootcamps");
+const course = require("./routes/courses");
 
 //express
 const app = express();
@@ -26,6 +30,7 @@ app.use(express.json());
 
 // app uses
 app.use("/api/v1/bootcamps", bootcamp);
+app.use("/api/v1/courses", course);
 app.use(errorHandles);
 
 const PORT = process.env.port || 3000;
