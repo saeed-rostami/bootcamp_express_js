@@ -29,7 +29,7 @@ exports.getBootcamps = asyncHandler(async (req, res, next) => {
 
 
     //Finding resource
-    query = Bootcamp.find(JSON.parse(queryString));
+    query = Bootcamp.find(JSON.parse(queryString)).populate("courses");
 
     if (req.query.select) {
         const fields = req.query.select.split(",").join(" ");
@@ -143,7 +143,7 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
 // @access private
 
 exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
-    const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+    const bootcamp = await Bootcamp.findById(req.params.id);
 
     if (!bootcamp) {
         return next(new ErrorResponse(`Bootcamp Not Found by Id ${req.params.id}`, 404));
@@ -152,6 +152,8 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
         success: true,
         msg: "Bootcamp Deleted"
     });
+
+    bootcamp.remove();
 });
 
 // @desc Get Bootcamps whithin radius

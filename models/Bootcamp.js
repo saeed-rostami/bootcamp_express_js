@@ -108,8 +108,13 @@ const BootcampSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
+},
 
-});
+    {
+        toJSON: {virtuals: true},
+        toObject: {virtuals: true},
+    }
+    );
 
 
 //Create slug bu slugify
@@ -138,6 +143,18 @@ BootcampSchema.pre('save', async function (next) {
     this.address = "undefined";
     next();
 });
+//cascade delete bootcamp on course
+BootcampSchema.pre("remove", async function next() {
+    await this.model("Course").deleteMany({bootcamp: this._id})
+});
 
+//verse populate botcamp
+BootcampSchema.virtual("courses",{
+    ref: "Course",
+    localField: "_id",
+    foreignField: "bootcamp",
+    justOne: false
+
+});
 
 module.exports = mongoose.model("Bootcamp", BootcampSchema);
