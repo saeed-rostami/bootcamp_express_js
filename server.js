@@ -17,8 +17,10 @@ connectDB();
 
 
 //route files
+const auth = require("./routes/auth");
 const bootcamp = require("./routes/bootcamps");
 const course = require("./routes/courses");
+const review = require("./routes/review");
 
 //express
 const app = express();
@@ -39,8 +41,12 @@ app.use(fileUpload());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // mount routes
+app.use("/api/v1/auth", auth);
 app.use("/api/v1/bootcamps", bootcamp);
 app.use("/api/v1/courses", course);
+app.use("/api/v1/review", review);
+
+
 app.use(errorHandles);
 
 const PORT = process.env.port || 3000;
