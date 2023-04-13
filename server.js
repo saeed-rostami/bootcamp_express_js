@@ -7,7 +7,7 @@ const colors = require("colors");
 const errorHandles = require("./middleware/error");
 const fileUpload = require('express-fileupload');
 const path = require('path');
-
+const cookieParser = require('cookie-parser');
 
 // Load env Variables
 dotenv.config({path: "./config/config.env"});
@@ -35,6 +35,7 @@ if (process.env.NODE_ENV === "development") {
 // app uses
 app.use(express.json());
 app.use(fileUpload());
+app.use(cookieParser());
 
 
 // set static folder

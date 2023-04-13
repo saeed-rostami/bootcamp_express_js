@@ -1,4 +1,4 @@
-// const User = require("../models/User");
+const User = require("../models/User");
 const ErrorResponse = require("../utilities/ErrorResponse");
 const asyncHandler = require("../middleware/async");
 
@@ -9,6 +9,82 @@ const asyncHandler = require("../middleware/async");
 
 exports.register = asyncHandler(async (req, res, next) => {
 
- res.status.json({success : false})
+    const { name, email, password, role } = req.body;
+
+    //   create user 
+    const user = await User.create({
+        name, email, password, role
+
+    });
+
+    //   create token 
+    const token = user.getSignedJwtToken();
+
+    res.status(200)
+        .json({
+            success: true,
+            token
+
+        })
 
 });
+
+
+// @desc Login
+// @route post /api/v1/auth/login
+// @access public
+
+exports.login = asyncHandler(async (req, res, next) => {
+
+    const { email, password } = req.body;
+
+    // validation 
+    if (!email || !password) {
+        return next(new ErrorResponse('please enter email and password', 422))
+    }
+
+    //user
+    const user = await User.findOne({ email: email }).select('+password');
+
+    if (!user) {
+        return next(new ErrorResponse('invalid credentials', 404))
+    }
+
+    //   check password 
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+        return next(new ErrorResponse('password is incorrect', 422))
+    }
+
+
+    sendTokenResponse(user, 200, res)
+    
+
+});
+
+
+// send token response;
+
+const sendTokenResponse = (user, statusCode, res) => {
+      //   create token 
+      const token = user.getSignedJwtToken();
+
+      const options = {
+        expires: new Date(
+            Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+        ),
+
+        httpOnly: true
+      };
+
+    res
+        .status(200)
+        .cookie('token', token, options)
+        .json({
+            success: true,
+            token
+
+        });
+
+}
