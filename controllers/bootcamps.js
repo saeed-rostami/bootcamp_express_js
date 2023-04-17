@@ -39,6 +39,16 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
 // @access private
 
 exports.createBootcamp = asyncHandler(async (req, res, next) => {
+
+    req.body.user = req.user;
+
+    const publishedBootcamp = await Bootcamp.findOne({user: req.user.id});
+
+    // CHECK IF USER IS ADMIN OR PUBLISHER
+    if (publishedBootcamp && req.user.role !== 'admin') {
+        return next(new ErrorResponse(`You Already Published Bootcamp `, 422));
+    }
+
     const bootcamp = await Bootcamp.create(req.body);
     res.status(201).json({
         success: true,
@@ -48,7 +58,7 @@ exports.createBootcamp = asyncHandler(async (req, res, next) => {
 });
 
 
-// @desc Update Bootcamps
+// @desc Update Bootcamp
 // @route get /api/v1/bootcamps/:id
 // @access private
 
@@ -126,7 +136,7 @@ exports.uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
 
     if (!req.files) {
         return next(new ErrorResponse(`Please Upload a File`, 422));
-    
+
     }
 
     const photo = req.files.file;
@@ -135,7 +145,7 @@ exports.uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
     // image validation
     if (!photo.mimetype.startsWith("image")) {
         return next(new ErrorResponse(`Please Upload a Valid Image`, 422));
-    
+
     }
 
     if (photo.size > process.env.MAX_FILE_UPLOAD) {
@@ -146,16 +156,16 @@ exports.uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
     photo.name = `photo_${bootcamp.id}${path.parse(photo.name).ext}`;
 
 
-    
-    photo.mv(`${process.env.FILE_UPLOADS_PATH}/${photo.name}` , async err => {
+    photo.mv(`${process.env.FILE_UPLOADS_PATH}/${photo.name}`, async err => {
         if (err) {
             console.log(err);
-        return next(new ErrorResponse(`Problem with file upload`, 422));
+            return next(new ErrorResponse(`Problem with file upload`, 422));
 
-        };
+        }
+        ;
 
 
-        await Bootcamp.findByIdAndUpdate(req.params.id , {photo : photo.name});
+        await Bootcamp.findByIdAndUpdate(req.params.id, {photo: photo.name});
 
         res.status(200).json({
             success: true,

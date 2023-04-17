@@ -29,16 +29,16 @@ router.route("/radius/:zipcode/:distance")
 router.route("/")
     .get(protect,
         advancedResults(Bootcamp, "courses"), getBootcamps)
-    .post(protect, authorization('publisher'), createBootcamp);
+    .post(protect, authorization('publisher' ,'admin'), createBootcamp);
 
 
 router.route("/:id")
     .get(getBootcamp)
-    .put(protect, authorization('publisher'), updateBootcamp)
-    .delete(protect, authorization('publisher'), deleteBootcamp);
+    .put(protect, authorization('publisher' ,'admin'), updateBootcamp)
+    .delete(protect, authorization('publisher' ,'admin'), deleteBootcamp);
 
 
-router.route("/:id/upload-photo").put(protect, authorization('publisher'), uploadBootcampPhoto);
+router.route("/:id/upload-photo").put(protect, authorization('publisher' ,'admin'), uploadBootcampPhoto);
 
 
 module.exports = router;
