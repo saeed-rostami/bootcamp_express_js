@@ -42,12 +42,15 @@ exports.createBootcamp = asyncHandler(async (req, res, next) => {
 
     req.body.user = req.user;
 
-    const publishedBootcamp = await Bootcamp.findOne({user: req.user.id});
+    const publishedBootcamp = await Bootcamp.findOne({ user: req.user.id });
 
+    console.log(publishedBootcamp)
     // CHECK IF USER IS ADMIN OR PUBLISHER
     if (publishedBootcamp && req.user.role !== 'admin') {
         return next(new ErrorResponse(`You Already Published Bootcamp `, 422));
     }
+
+
 
     const bootcamp = await Bootcamp.create(req.body);
     res.status(201).json({
@@ -71,6 +74,13 @@ exports.updateBootcamp = asyncHandler(async (req, res, next) => {
     if (!bootcamp) {
         return next(new ErrorResponse(`Bootcamp Not Found by Id ${req.params.id}`, 404));
     }
+
+    // MAKE SURE USER IS BOOTCAMP OWNER;
+
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(new ErrorResponse(`This bootcamp is not belongs to you`, 422));
+    }
+
     res.status(200).json({
         success: true,
         msg: "Bootcamp Updated",
@@ -89,6 +99,11 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
     if (!bootcamp) {
         return next(new ErrorResponse(`Bootcamp Not Found by Id ${req.params.id}`, 404));
     }
+
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(new ErrorResponse(`This bootcamp is not belongs to you`, 422));
+    }
+
     res.status(200).json({
         success: true,
         msg: "Bootcamp Deleted"
@@ -101,7 +116,7 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) => {
 // @route get /api/v1/bootcamps/radius/:zipcode/:distance
 // @access private
 exports.getBootcampsInRadius = asyncHandler(async (req, res, next) => {
-    const {zipcode, distance} = req.params;
+    const { zipcode, distance } = req.params;
 
     console.log(zipcode, distance);
     //get lang & lat from geocode
@@ -113,7 +128,7 @@ exports.getBootcampsInRadius = asyncHandler(async (req, res, next) => {
     const radius = distance / 3963;
 
     const bootcamps = await Bootcamp.find({
-        location: {$geoWithin: {$centerSphere: [[lng, lat], radius]}}
+        location: { $geoWithin: { $centerSphere: [[lng, lat], radius] } }
     });
 
     res.status(200).json({
@@ -132,6 +147,10 @@ exports.uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
 
     if (!bootcamp) {
         return next(new ErrorResponse(`Bootcamp Not Found by Id ${req.params.id}`, 404));
+    }
+
+    if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+        return next(new ErrorResponse(`This bootcamp is not belongs to you`, 422));
     }
 
     if (!req.files) {
@@ -165,7 +184,7 @@ exports.uploadBootcampPhoto = asyncHandler(async (req, res, next) => {
         ;
 
 
-        await Bootcamp.findByIdAndUpdate(req.params.id, {photo: photo.name});
+        await Bootcamp.findByIdAndUpdate(req.params.id, { photo: photo.name });
 
         res.status(200).json({
             success: true,
