@@ -27,7 +27,7 @@ router.route("/radius/:zipcode/:distance")
     .get(getBootcampsInRadius);
 
 router.route("/")
-    .get(protect,
+    .get(
         advancedResults(Bootcamp, "courses"), getBootcamps)
     .post(protect, authorization('publisher' ,'admin'), createBootcamp);
 

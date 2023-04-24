@@ -103,3 +103,27 @@ exports.me = asyncHandler(async (req, res, next) => {
             data: user,
         });
 });
+
+
+// @desc forgot-password
+// @route post /api/v1/auth/forgot-password
+// @access public
+
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+    const user = User.findOne({email: req.body.email});
+
+    if (!user) {
+        return next(new ErrorResponse('nothing found any user', 422))
+    }
+
+    const resetToken = user.getResetPasswordToken();
+
+    await user.save({validateBeforeSave: false});
+    res
+        .status(200)
+        .json({
+            success: true,
+            data: user,
+        });
+
+});
