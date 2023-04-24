@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const ErrorResponse = require("../utilities/ErrorResponse");
 const asyncHandler = require("../middleware/async");
+const sendEmail = require("../utilities/emailing");
 
 
 // @desc Register
@@ -110,17 +111,45 @@ exports.me = asyncHandler(async (req, res, next) => {
 // @access public
 
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
-    const user = User.findOne({email: req.body.email});
+    const user = await User.findOne({email: req.body.email});
 
     if (!user) {
         return next(new ErrorResponse('nothing found any user', 422))
     }
 
-    const resetToken = user.getResetPasswordToken();
+    const resetToken =  user.getResetPasswordToken;
 
     await user.save({validateBeforeSave: false});
-    res
-        .status(200)
+
+    const message = `Email Omad?`;
+
+    try {
+        await sendEmail({
+            email : user.email,
+            subject: 'email reset',
+            message
+        });
+
+        
+    res.status(200)
+    .json({
+        success: true,
+    });
+
+    }
+    catch(err) {
+        console.log(err);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+
+        await user.save({validateBeforeSave: false});
+
+        return next(new ErrorResponse('email could not send', 422))
+
+    }
+
+
+    res.status(200)
         .json({
             success: true,
             data: user,
