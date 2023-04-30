@@ -67,20 +67,20 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
 };
 
 // Generate and hash password token
-userSchema.methods.getResetPasswordToken = async function () {
-    const resetToken = crypto.randomBytes(20);
+userSchema.methods.getResetPasswordToken = function() {
+    // Generate token
+    const resetToken = crypto.randomBytes(20).toString('hex');
 
-//     hash token and set reset password token field
+    // Hash token and set to resetPasswordToken field
     this.resetPasswordToken = crypto
-        .createHash(56)
+        .createHash('sha256')
         .update(resetToken)
         .digest('hex');
 
-// set expire
+    // Set expire
     this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
 
     return resetToken;
-
 };
 
 module.exports = mongoose.model("User" , userSchema);

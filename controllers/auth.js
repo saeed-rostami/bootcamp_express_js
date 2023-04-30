@@ -118,16 +118,21 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse('nothing found any user', 422))
     }
 
-    const resetToken = user.getResetPasswordToken;
+    const resetToken = user.getResetPasswordToken();
 
     await user.save({validateBeforeSave: false});
 
-    const message = `Email Omad?`;
+    // Create reset url
+    const resetUrl = `${req.protocol}://${req.get(
+        'host'
+    )}/api/v1/auth/resetpassword/${resetToken}`;
+
+    const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
     try {
         await sendEmail({
             email: user.email,
-            subject: 'email reset',
+            subject: 'Password reset token',
             message
         });
 
@@ -135,6 +140,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
         res.status(200)
             .json({
                 success: true,
+                resetToken
             });
 
     } catch (err) {
@@ -166,7 +172,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
     const resetPasswordToken = crypto
         .createHash('sha256')
-        .update(req.params.resetPasswordToken)
+        .update(req.params.resettoken)
         .digest('hex');
 
 
@@ -200,13 +206,13 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
         .select('+password');
 
     // check user password
-    if (!(await user.matchPassword(req.user.currentPassword))) {
+    if (!(await user.matchPassword(req.body.currentPassword))) {
         return next(new ErrorResponse('password is incorrect', 422))
     }
 
     user.password = req.body.newPassword;
     await user.save();
-    
+
     sendTokenResponse(user, 200, res);
 
 });
